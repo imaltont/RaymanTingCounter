@@ -50,9 +50,18 @@ def label_video(filename="", ting_number=(0,0), ting_location_y=(0,0), life_numb
         if x is None:
             break
     save_csv(csv_data=image_data)
-def crop_and_resize(image=None, ting_x=(0,0), ting_y=(0,0), life_x=(0,0), life_y=(0,0)):
-    #TODO Just a placeholder for now
-    return [image]
+def crop_and_resize(image=None, ting_x=(285,298), ting_y=(10,10), life_x=(46, 63), life_y=(10,10)):
+    image = cv2.resize(image, (320,240))
+    image_list = [1 for x in range(4)]
+    number_height = 23
+    number_width = 15
+
+    image_list[0] = image[ting_y[0]:ting_y[0]+number_height, ting_x[0]:ting_x[0]+number_width]
+    image_list[1] = image[ting_y[1]:ting_y[1]+number_height, ting_x[1]:ting_x[1]+number_width]
+    image_list[2] = image[life_y[0]:life_y[0]+number_height, life_x[0]:life_x[0]+number_width]
+    image_list[3] = image[life_y[1]:life_y[1]+number_height, life_x[1]:life_x[1]+number_width]
+
+    return image_list
 def read_csv(filename="training_data/training_data.csv", csv_data=[]):
     image_list = []
     with open(filename, newline='') as csvfile:
