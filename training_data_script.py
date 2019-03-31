@@ -25,6 +25,8 @@ def label_video(filename="", ting_number=(0,0), ting_location_y=(0,0), life_numb
     while(cap.isOpened()):
         ret, frame = cap.read()
         #do cropping here
+        if frame is None:
+            break
         numbers = crop_and_resize(frame)
         for x in numbers:
             #show image
@@ -32,12 +34,16 @@ def label_video(filename="", ting_number=(0,0), ting_location_y=(0,0), life_numb
                 cap.release()
                 break
             cv2.imshow("Current_num",x)
-            cv2.waitKey(0)
+            n = cv2.waitKey(0)
+            if n-48 in range(0,10):
+                value = n-48
+            else:
+                value = -1
             cv2.destroyAllWindows()
             cv2.waitKey(1)
 
             #Get value of number
-            value = int(input("Which number was it: "))
+            #value = input("Which number was it: ")
 
             #save image
             img_filename = "".join([str(image_ID), '.png'])
