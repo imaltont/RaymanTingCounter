@@ -45,6 +45,8 @@ class NN:
             activation_func = relu
         elif activation == "sigmoid":
             activation_func = sigmoid
+        elif activation == "softmax":
+            activation_func = softmax
         else:
             raise Exception("This activation function does not exist")
 
@@ -83,6 +85,8 @@ class NN:
             activation_func = relu_der
         elif activation == "sigmoid":
             activation_func = sigmoid_der
+        elif activation == "softmax":
+            activation_func = softmax_der
         else:
             raise Exception('Not supported activation function')
 
@@ -99,12 +103,18 @@ class NN:
             self.params_values["".join(['W', str(layer_idx)])] -= self.learning_rate * grads_values["".join(['dW', str(layer_idx)])]
             self.params_values["".join(['b', str(layer_idx)])] -= self.learning_rate * grads_values["".join(['db', str(layer_idx)])]
 
-    def train(self, X, Y, epochs, batch_size=1):
+    def train(self, X, Y, epochs, batch_size=1, test_X = [], test_Y = [], print_interval=100):
         cost_history = []
         accuracy_history = []
 
         for i in range(epochs):
             print("".join(["Epoch #", str(i)]))
+
+            if i % print_interval == 0:
+                print("".join(["Training accuracy: ", str(get_accuracy_value(self.inference(X)[0], Y))]))
+                if test_X:
+                    print("".join(["Test accuracy: ", str(get_accuracy_value(self.inference(test_X)[0], test_Y))]))
+                print("".join(['-']*50))
 
             randomizer = []
             new_X = []
@@ -145,6 +155,13 @@ def relu_der(dA, x):
     dX[x<=0] = 0
     return dX
 
+def softmax(x):
+    e_x = np.exp(x - np.max(x))
+    return e_x / (e_x.sum(axis=0) + dummy_log)
+def softmax_der(dA, x):
+    soft = softmax(x)
+    return dA * soft * (1-soft)
+
 #Error function
 def get_cost_value(y_hat, y):
     m = y_hat.shape[1]
@@ -172,10 +189,10 @@ training_data, train_Y = load_training_data()
 arch = [
         {"input_dim": 345, "output_dim": 690, "activation":"relu"},
         {"input_dim": 690, "output_dim": 345, "activation":"sigmoid"},
-        {"input_dim": 345, "output_dim": 10, "activation":"sigmoid"},
+        {"input_dim": 345, "output_dim": 10, "activation":"softmax"},
         ]
 nn = NN(arch, learning_rate=0.1, seed=randint(1, 100))
-cost, acc = nn.train(training_data, train_Y, 500, 50)
+cost, acc = nn.train(training_data, train_Y, 500, 50, print_interval=10)
 a = nn.inference(training_data)[0]
 print (get_accuracy_value(a, train_Y))
 
@@ -183,10 +200,10 @@ print (get_accuracy_value(a, train_Y))
 #training_data = [np.array([x,y]) for x in range(2) for y in range(2)]
 #train_Y = [np.array([0, 1]), np.array([1, 0]), np.array([1, 0]), np.array([0, 1])]
 #arch = [
-#        {"input_dim": 2, "output_dim": 4, "activation":"sigmoid"},
-#        {"input_dim": 4, "output_dim": 2, "activation":"sigmoid"},
+#        {"input_dim": 2, "output_dim": 10, "activation":"relu"},
+#        {"input_dim": 10, "output_dim": 2, "activation":"sigmoid"},
 #        ]
-#nn = NN(arch, learning_rate=0.5, seed=randint(0, 100))
-#cost, acc = nn.train(np.transpose(training_data), np.transpose(train_Y), 500, 1)
+#nn = NN(arch, learning_rate=0.1, seed=randint(1, 100))
+#cost, acc = nn.train(np.transpose(training_data), np.transpose(train_Y), 100, 1)
 #a = nn.inference(np.transpose(training_data))[0]
 #print (get_accuracy_value(a, np.transpose(train_Y)))
